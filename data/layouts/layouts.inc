@@ -165,7 +165,7 @@ OldaleTown_Layout::
 	.4byte OldaleTown_Layout_Border
 	.4byte OldaleTown_Layout_Blockdata
 	.4byte gTileset_General
-	.4byte gTileset_Petalburg
+	.4byte gTileset_albanova27x
 
 DewfordTown_Layout_Border::
 	.incbin "data/layouts/DewfordTown/border.bin"
@@ -285,7 +285,7 @@ Route103_Layout::
 	.4byte Route103_Layout_Border
 	.4byte Route103_Layout_Blockdata
 	.4byte gTileset_General
-	.4byte gTileset_Petalburg
+	.4byte gTileset_albanova27x
 
 Route104_Layout_Border::
 	.incbin "data/layouts/Route104/border.bin"
