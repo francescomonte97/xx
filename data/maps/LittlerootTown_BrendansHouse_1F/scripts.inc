@@ -289,19 +289,34 @@ LittlerootTown_BrendansHouse_1F_Movement_BrendanGoUpstairs2:
 	step_end
 
 PlayersHouse_1F_Text_IsntItNiceInHere:
-	.string "Agente EPX: Ed eccoci qua {PLAYER}!\n"
-	.string "Non è meraviglioso vero?$"
+	.string "Agente EPX: Bene, eccoci dentro.\p"
+	.string "Questa struttura e' stata\n"
+	.string "progettata per raccogliere\l"
+	.string "dati in condizioni controllate.\p"
+	.string "Qui osserviamo ambienti,\n"
+	.string "POKéMON e tirocinanti durante\l"
+	.string "le prime fasi operative.$"
 
 PlayersHouse_1F_Text_MoversPokemonGoSetClock:
-	.string "In questi edifici,\n"
-	.string "due per l'esattezza\l"
-	.string "viene analizzato il DNA dei POKéMON\p"
-	.string "e da oggi in poi tu ci darai una mano!\n"
-	.string "Ma prima ancora di iniziare\l"
-	.string "vai dal Prof. Gigi,\p"
-	.string "dovrebbe essere in giro\n"
-	.string "a perlustrare la zona...$"
-
+	.string "Ogni rapporto prodotto sul campo\n"
+	.string "passa prima da questi terminali.\p"
+	.string "Il tuo compito, almeno per ora,\n"
+	.string "sara' osservare, imparare\l"
+	.string "e registrare cio' che scopri.\p"
+	.string "Ah, quasi dimenticavo.\n"
+	.string "Questo e' il tuo mazzo di chiavi.\p"
+	.string "Agente EPX: Hai ottenuto il\n"
+	.string "MAZZO DI CHIAVI!\p"
+	.string "Il tuo appartamento si trova\n"
+	.string "ad ALBANOVA NORD.\p"
+	.string "Una volta quella zona era\n"
+	.string "conosciuta come SOLAROSA.\p"
+	.string "Ora ospita ricercatori,\n"
+	.string "docenti e tirocinanti EPX.\p"
+	.string "Sistemati pure con calma.\n"
+	.string "Poi torna qui.\p"
+	.string "Dovremo registrarti nel\n"
+	.string "sistema del PROTOCOLLO XX.$"
 
 PlayersHouse_1F_Text_ArentYouInterestedInRoom:
 	.string "MOM: Well, {PLAYER}?\p"

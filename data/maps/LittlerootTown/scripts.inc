@@ -918,7 +918,7 @@ LittlerootTown_Text_OurNewHomeLetsGoInside:
 	.string "durante il tuo periodo di tirocinio\l"
 	.string "qui da noi!\p"
 	.string "Vedi questo edificio di fronte a te?\n"
-	.string "Questo è un Micromondo X!\l"
+	.string "Questo è un MICROMONDO X!\l"
 	.string "Una delle nostre ultime invenzioni!\l"
 	.string "Entriamo {PLAYER} così ti spiego meglio.$"
 

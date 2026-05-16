@@ -228,7 +228,7 @@ Route101_EventScript_BirchsBag::
 	setobjectxy OBJ_EVENT_ID_PLAYER, 6, 13
 	applymovement OBJ_EVENT_ID_PLAYER, Common_Movement_WalkInPlaceFasterLeft
 	waitmovement 0
-	special ChooseStarter
+	special StartNewPokeballCaseUI
 	waitstate
 	applymovement LOCALID_BIRCH, Route101_Movement_BirchApproachPlayer
 	waitmovement 0
@@ -261,28 +261,34 @@ Route101_Movement_BirchApproachPlayer:
 	step_end
 
 Route101_Text_HelpMe:
-	.string "H-help me!$"
+	.string "Ehi! Qualcuno mi aiuti!$"
 
 Route101_Text_PleaseHelp:
-	.string "Hello! You over there!\n"
-	.string "Please! Help!\p"
-	.string "In my BAG!\n"
-	.string "There's a POKé BALL!$"
+	.string "Tu, laggiu'!\n"
+	.string "Per favore, aiutami!\p"
+	.string "Nella valigetta ci sono\n"
+	.string "delle POKé BALL!\p"
+	.string "Prendine una, presto!$"
 
 Route101_Text_DontLeaveMe:
-	.string "Wh-Where are you going?!\n"
-	.string "Don't leave me like this!$"
+	.string "Ehi! Dove vai?!\n"
+	.string "Non lasciarmi qui!$"
 
 Route101_Text_YouSavedMe:
-	.string "PROF. BIRCH: Whew…\p"
-	.string "I was in the tall grass studying wild\n"
-	.string "POKéMON when I was jumped.\p"
-	.string "You saved me.\n"
-	.string "Thanks a lot!\p"
-	.string "Oh?\p"
-	.string "Hi, you're {PLAYER}{KUN}!\p"
-	.string "This is not the place to chat, so come\n"
-	.string "by my POKéMON LAB later, okay?$"
+	.string "PROF. GIGI: Uff...\n"
+	.string "Me la sono vista brutta.\p"
+	.string "Grazie, mi hai dato\n"
+	.string "davvero una mano.\p"
+	.string "Quello ZIGZAGOON e' sbucato\n"
+	.string "all'improvviso mentre stavo\l"
+	.string "controllando la zona.\p"
+	.string "Aspetta un momento...\p"
+	.string "Tu sei {PLAYER}{KUN}, vero?\n"
+	.string "Il nuovo tirocinante EPX.\p"
+	.string "Meglio non restare qui.\n"
+	.string "Torniamo al laboratorio.\p"
+	.string "Vorrei conoscerti meglio\n"
+	.string "in un posto piu' tranquillo.$"
 
 Route101_Text_TakeTiredPokemonToPokeCenter:
 	.string "If POKéMON get tired, take them to\n"
@@ -299,4 +305,3 @@ Route101_Text_WildPokemonInTallGrass:
 Route101_Text_RouteSign:
 	.string "ROUTE 101\n"
 	.string "{UP_ARROW} OLDALE TOWN$"
-

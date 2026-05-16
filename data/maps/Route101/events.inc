@@ -21,7 +21,6 @@ Route101_MapCoordEvents:
 	coord_event 6, 15, 3, VAR_ROUTE101_STATE, 2, Route101_EventScript_PreventExitWest
 	coord_event 6, 17, 3, VAR_ROUTE101_STATE, 2, Route101_EventScript_PreventExitWest
 	coord_event 6, 18, 3, VAR_ROUTE101_STATE, 2, Route101_EventScript_PreventExitWest
-	coord_event 7, 13, 3, VAR_ROUTE101_STATE, 2, Route101_EventScript_PreventExitNorth
 	coord_event 9, 19, 3, VAR_ROUTE101_STATE, 1, Route101_EventScript_StartBirchRescue
 	coord_event 9, 18, 3, VAR_ROUTE101_STATE, 2, Route101_EventScript_PreventExitSouth
 	coord_event 8, 18, 3, VAR_ROUTE101_STATE, 2, Route101_EventScript_PreventExitSouth
@@ -36,6 +35,10 @@ Route101_MapCoordEvents:
 	coord_event 6, 19, 3, VAR_ROUTE101_STATE, 1, Route101_EventScript_StartBirchRescue
 	coord_event 12, 19, 3, VAR_ROUTE101_STATE, 1, Route101_EventScript_StartBirchRescue
 	coord_event 13, 19, 3, VAR_ROUTE101_STATE, 1, Route101_EventScript_StartBirchRescue
+	coord_event 11, 14, 0, VAR_ROUTE101_STATE, 2, Route101_EventScript_PreventExitNorth
+	coord_event 9, 14, 0, VAR_ROUTE101_STATE, 2, Route101_EventScript_PreventExitNorth
+	coord_event 10, 14, 0, VAR_ROUTE101_STATE, 2, Route101_EventScript_PreventExitNorth
+	coord_event 8, 14, 0, VAR_ROUTE101_STATE, 2, Route101_EventScript_PreventExitNorth
 
 Route101_MapBGEvents:
 	bg_sign_event 5, 9, 0, BG_EVENT_PLAYER_FACING_ANY, Route101_EventScript_RouteSign

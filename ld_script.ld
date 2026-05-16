@@ -342,6 +342,7 @@ SECTIONS {
         src/international_string_util.o(.text);
         src/ui_stat_editor.o(.text);
         src/ui_main_menu.o(.text);
+        src/ui_birch_case.o(.text);
     } > ROM =0
 
     script_data :
@@ -706,6 +707,7 @@ SECTIONS {
         data/sound_data.o(.rodata);
         src/ui_stat_editor.o(.rodata);
         src/ui_main_menu.o(.rodata);
+        src/ui_birch_case.o(.rodata);
     } > ROM =0
 
     song_data :
