@@ -26,6 +26,8 @@
 #include "pokemon_icon.h"
 #include "trainer_pokemon_sprites.h"
 #include "contest_util.h"
+#include "cfu.h"
+#include "ppa.h"
 #include "constants/songs.h"
 #include "constants/game_stat.h"
 #include "constants/battle_frontier.h"
@@ -50,6 +52,8 @@ struct TrainerCardData
     u8 timeColonBlinkTimer;
     bool8 timeColonInvisible;
     bool8 onBack;
+    bool8 onPpa;
+    bool8 ppaReturnOnBack;
     bool8 allowDMACopy;
     bool8 hasPokedex;
     bool8 hasHofResult;
@@ -109,6 +113,7 @@ static void DrawCardFrontOrBack(u16 *);
 static void DrawStarsAndBadgesOnCard(void);
 static void PrintTimeOnCard(void);
 static void FlipTrainerCard(void);
+static void ShowTrainerCardPpaPage(void);
 static bool8 IsCardFlipTaskActive(void);
 static bool8 LoadCardGfx(void);
 static void CB2_InitTrainerCard(void);
@@ -283,6 +288,9 @@ static const u16 *const sKantoTrainerCardPals[] =
 static const u8 sTrainerCardTextColors[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
 static const u8 sTrainerCardStatColors[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_RED, TEXT_COLOR_LIGHT_RED};
 static const u8 sTimeColonInvisibleTextColors[6] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_TRANSPARENT, TEXT_COLOR_TRANSPARENT};
+static const u8 sText_EpxCard[] = _("EPX CARD");
+static const u8 sText_PpaLabel[] = _("PPA:");
+static const u8 sText_CfuLabel[] = _("CFU:");
 
 static const u8 sTrainerPicOffset[2][GENDER_COUNT][2] =
 {
@@ -373,6 +381,9 @@ static void CloseTrainerCard(u8 taskId)
 #define STATE_CLOSE_CARD          14
 #define STATE_WAIT_LINK_PARTNER   15
 #define STATE_CLOSE_CARD_LINK     16
+#define STATE_PPA_PANEL           17
+#define STATE_WAIT_FLIP_TO_PPA    18
+#define STATE_WAIT_FLIP_PPA_FRONT 19
 
 static void Task_TrainerCard(u8 taskId)
 {
@@ -443,7 +454,15 @@ static void Task_TrainerCard(u8 taskId)
             DrawTrainerCardWindow(WIN_CARD_TEXT);
             sData->timeColonNeedDraw = FALSE;
         }
-        if (JOY_NEW(A_BUTTON))
+        if (JOY_NEW(START_BUTTON) && !sData->isLink)
+        {
+            sData->ppaReturnOnBack = sData->onBack;
+            sData->onPpa = TRUE;
+            FlipTrainerCard();
+            sData->mainState = STATE_WAIT_FLIP_TO_PPA;
+            PlaySE(SE_RG_CARD_FLIP);
+        }
+        else if (JOY_NEW(A_BUTTON))
         {
             FlipTrainerCard();
             PlaySE(SE_RG_CARD_FLIP);
@@ -470,7 +489,15 @@ static void Task_TrainerCard(u8 taskId)
         }
         break;
     case STATE_HANDLE_INPUT_BACK:
-        if (JOY_NEW(B_BUTTON))
+        if (JOY_NEW(START_BUTTON) && !sData->isLink)
+        {
+            sData->ppaReturnOnBack = sData->onBack;
+            sData->onPpa = TRUE;
+            FlipTrainerCard();
+            sData->mainState = STATE_WAIT_FLIP_TO_PPA;
+            PlaySE(SE_RG_CARD_FLIP);
+        }
+        else if (JOY_NEW(B_BUTTON))
         {
             if (gReceivedRemoteLinkPlayers && sData->isLink && InUnionRoom() == TRUE)
             {
@@ -488,7 +515,7 @@ static void Task_TrainerCard(u8 taskId)
                 PlaySE(SE_RG_CARD_FLIP);
             }
         }
-        else if (JOY_NEW(A_BUTTON))
+        else if (JOY_NEW(A_BUTTON) && sData->isLink)
         {
            if (gReceivedRemoteLinkPlayers && sData->isLink && InUnionRoom() == TRUE)
            {
@@ -523,6 +550,33 @@ static void Task_TrainerCard(u8 taskId)
         if (IsCardFlipTaskActive() && Overworld_IsRecvQueueAtMax() != TRUE)
         {
             sData->mainState = STATE_HANDLE_INPUT_FRONT;
+            PlaySE(SE_RG_CARD_OPEN);
+        }
+        break;
+    case STATE_PPA_PANEL:
+        if (JOY_NEW(START_BUTTON) || JOY_NEW(B_BUTTON))
+        {
+            if (sData->ppaReturnOnBack)
+                sData->onBack = FALSE;
+            else
+                sData->onBack = TRUE;
+            sData->onPpa = FALSE;
+            FlipTrainerCard();
+            sData->mainState = STATE_WAIT_FLIP_PPA_FRONT;
+            PlaySE(SE_RG_CARD_FLIP);
+        }
+        break;
+    case STATE_WAIT_FLIP_TO_PPA:
+        if (IsCardFlipTaskActive() && Overworld_IsRecvQueueAtMax() != TRUE)
+        {
+            sData->mainState = STATE_PPA_PANEL;
+            PlaySE(SE_RG_CARD_OPEN);
+        }
+        break;
+    case STATE_WAIT_FLIP_PPA_FRONT:
+        if (IsCardFlipTaskActive() && Overworld_IsRecvQueueAtMax() != TRUE)
+        {
+            sData->mainState = (sData->onBack ? STATE_HANDLE_INPUT_BACK : STATE_HANDLE_INPUT_FRONT);
             PlaySE(SE_RG_CARD_OPEN);
         }
         break;
@@ -1418,6 +1472,38 @@ static void DrawTrainerCardWindow(u8 windowId)
     CopyWindowToVram(windowId, COPYWIN_FULL);
 }
 
+static void ShowTrainerCardPpaPage(void)
+{
+    u8 x;
+
+    ConvertIntToDecimalStringN(gStringVar1, GetPpa(), STR_CONV_MODE_LEFT_ALIGN, 10);
+    ConvertIntToDecimalStringN(gStringVar2, GetCfu(), STR_CONV_MODE_LEFT_ALIGN, 3);
+
+    FillWindowPixelBuffer(WIN_CARD_TEXT, PIXEL_FILL(0));
+    FillWindowPixelBuffer(WIN_TRAINER_PIC, PIXEL_FILL(0));
+    ClearWindowTilemap(WIN_CARD_TEXT);
+    ClearWindowTilemap(WIN_TRAINER_PIC);
+    CopyWindowToVram(WIN_CARD_TEXT, COPYWIN_FULL);
+    CopyWindowToVram(WIN_TRAINER_PIC, COPYWIN_FULL);
+
+    FillBgTilemapBufferRect_Palette0(0, 0, 0, 0, 32, 32);
+    FillBgTilemapBufferRect_Palette0(3, 0, 0, 0, 32, 32);
+    DrawCardScreenBackground(sData->bgTilemap);
+    CopyBgTilemapBufferToVram(0);
+    CopyBgTilemapBufferToVram(3);
+
+    FillWindowPixelBuffer(WIN_CARD_TEXT, PIXEL_FILL(1));
+    DrawDialogueFrame(WIN_CARD_TEXT, FALSE);
+    x = GetStringCenterAlignXOffset(FONT_NORMAL, sText_EpxCard, 216);
+    AddTextPrinterParameterized3(WIN_CARD_TEXT, FONT_NORMAL, x, 28, sTrainerCardStatColors, TEXT_SKIP_DRAW, sText_EpxCard);
+    AddTextPrinterParameterized3(WIN_CARD_TEXT, FONT_NORMAL, 48, 68, sTrainerCardTextColors, TEXT_SKIP_DRAW, sText_PpaLabel);
+    AddTextPrinterParameterized3(WIN_CARD_TEXT, FONT_NORMAL, GetStringRightAlignXOffset(FONT_NORMAL, gStringVar1, 168), 68, sTrainerCardStatColors, TEXT_SKIP_DRAW, gStringVar1);
+    AddTextPrinterParameterized3(WIN_CARD_TEXT, FONT_NORMAL, 48, 92, sTrainerCardTextColors, TEXT_SKIP_DRAW, sText_CfuLabel);
+    AddTextPrinterParameterized3(WIN_CARD_TEXT, FONT_NORMAL, GetStringRightAlignXOffset(FONT_NORMAL, gStringVar2, 168), 92, sTrainerCardStatColors, TEXT_SKIP_DRAW, gStringVar2);
+    PutWindowTilemap(WIN_CARD_TEXT);
+    CopyWindowToVram(WIN_CARD_TEXT, COPYWIN_FULL);
+}
+
 static u8 SetCardBgsAndPals(void)
 {
     switch (sData->bgPalLoadState)
@@ -1682,7 +1768,11 @@ static bool8 Task_DrawFlippedCardSide(struct Task *task)
             FillBgTilemapBufferRect_Palette0(3, 0, 0, 0, 0x20, 0x20);
             break;
         case 1:
-            if (!sData->onBack)
+            if (sData->onPpa)
+            {
+                ShowTrainerCardPpaPage();
+            }
+            else if (!sData->onBack)
             {
                 if (!PrintAllOnCardBack())
                     return FALSE;
@@ -1694,19 +1784,23 @@ static bool8 Task_DrawFlippedCardSide(struct Task *task)
             }
             break;
         case 2:
+            if (sData->onPpa)
+                break;
             if (!sData->onBack)
                 DrawCardFrontOrBack(sData->backTilemap);
             else
                 DrawTrainerCardWindow(WIN_CARD_TEXT);
             break;
         case 3:
+            if (sData->onPpa)
+                break;
             if (!sData->onBack)
                 DrawCardBackStats();
             else
                 FillWindowPixelBuffer(WIN_TRAINER_PIC, PIXEL_FILL(0));
             break;
         case 4:
-            if (sData->onBack)
+            if (!sData->onPpa && sData->onBack)
                 CreateTrainerCardTrainerPic();
             break;
         default:
@@ -1725,16 +1819,25 @@ static bool8 Task_SetCardFlipped(struct Task *task)
 {
     sData->allowDMACopy = FALSE;
 
+    if (sData->onPpa)
+    {
+        DrawTrainerCardWindow(WIN_CARD_TEXT);
+    }
     // If on back of card, draw front of card because its being flipped
-    if (sData->onBack)
+    else if (sData->onBack)
     {
         DrawTrainerCardWindow(WIN_TRAINER_PIC);
         DrawCardScreenBackground(sData->bgTilemap);
         DrawCardFrontOrBack(sData->frontTilemap);
         DrawStarsAndBadgesOnCard();
+        DrawTrainerCardWindow(WIN_CARD_TEXT);
+        sData->onBack ^= 1;
     }
-    DrawTrainerCardWindow(WIN_CARD_TEXT);
-    sData->onBack ^= 1;
+    else
+    {
+        DrawTrainerCardWindow(WIN_CARD_TEXT);
+        sData->onBack ^= 1;
+    }
     task->tFlipState++;
     sData->allowDMACopy = TRUE;
     PlaySE(SE_RG_CARD_FLIPPING);

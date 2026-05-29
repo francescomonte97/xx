@@ -1,5 +1,12 @@
+.set LOCALID_GUIDA_EPX, 4
+
 RustboroCity_Gym_MapScripts::
+	map_script MAP_SCRIPT_ON_FRAME_TABLE, RustboroCity_Gym_OnFrame
 	.byte 0
+
+RustboroCity_Gym_OnFrame:
+	map_script_2 VAR_TEMP_0, 0, RustboroCity_Gym_EventScript_GymGuide
+	.2byte 0
 
 RustboroCity_Gym_EventScript_Roxanne::
 	trainerbattle_single TRAINER_ROXANNE_1, RustboroCity_Gym_Text_RoxanneIntro, RustboroCity_Gym_Text_RoxanneDefeat, RustboroCity_Gym_EventScript_RoxanneDefeated, NO_MUSIC
@@ -54,6 +61,7 @@ RustboroCity_Gym_EventScript_Marc::
 	end
 
 RustboroCity_Gym_EventScript_GymGuide::
+	goto_if_eq VAR_TEMP_0, 0, RustboroCity_Gym_EventScript_GymGuideCheckCfu
 	lock
 	faceplayer
 	goto_if_set FLAG_DEFEATED_RUSTBORO_GYM, RustboroCity_Gym_EventScript_GymGuidePostVictory
@@ -61,10 +69,45 @@ RustboroCity_Gym_EventScript_GymGuide::
 	release
 	end
 
+RustboroCity_Gym_EventScript_GymGuideCheckCfu::
+	specialvar VAR_RESULT, RustboroGymGetCfuStatus
+	setvar VAR_TEMP_0, 1
+	goto_if_eq VAR_RESULT, TRUE, RustboroCity_Gym_EventScript_GymGuideAllowEntry
+	lockall
+	applymovement LOCALID_GUIDA_EPX, RustboroCity_Gym_Movement_GuidaEpxApproachPlayer
+	waitmovement 0
+	applymovement LOCALID_GUIDA_EPX, Common_Movement_WalkInPlaceFasterDown
+	waitmovement 0
+	msgbox RustboroCity_Gym_Text_GuidaEpxCheckIntro, MSGBOX_DEFAULT
+	closemessage
+	delay 60
+	msgbox RustboroCity_Gym_Text_GuidaEpxNotEnoughCfu, MSGBOX_DEFAULT
+	closemessage
+	applymovement OBJ_EVENT_ID_PLAYER, RustboroCity_Gym_Movement_PlayerExitGym
+	waitmovement 0
+	delay 8
+	warp MAP_RUSTBORO_CITY, 27, 20
+	waitstate
+	releaseall
+	end
+
+RustboroCity_Gym_EventScript_GymGuideAllowEntry::
+	end
+
 RustboroCity_Gym_EventScript_GymGuidePostVictory::
 	msgbox RustboroCity_Gym_Text_GymGuidePostVictory, MSGBOX_DEFAULT
 	release
 	end
+
+RustboroCity_Gym_Movement_GuidaEpxApproachPlayer:
+	walk_right
+	walk_right
+	walk_in_place_down
+	step_end
+
+RustboroCity_Gym_Movement_PlayerExitGym:
+	walk_in_place_down
+	step_end
 
 RustboroCity_Gym_EventScript_LeftGymStatue::
 	lockall
@@ -124,6 +167,29 @@ RustboroCity_Gym_Text_GymGuideAdvice:
 	.string "Come see me afterwards, if you beat\n"
 	.string "the GYM LEADER.\p"
 	.string "Well, go for it!$"
+
+RustboroCity_Gym_Text_GuidaEpxCheckIntro:
+	.string "Ispettore EPX:\n"
+	.string "Buongiorno. Sono l'Ispettore EPX\l"
+	.string "della EPX S.p.A.\p"
+	.string "Prima di autorizzare la sfida,\n"
+	.string "devo verificare i tuoi CFU.\p"
+	.string "Mostrami la tua EPX Card,\n"
+	.string "per favore.$"
+
+RustboroCity_Gym_Text_GuidaEpxNotEnoughCfu:
+	.string "Ispettore EPX:\n"
+	.string "Dunque...\p"
+	.string "Dalla tua EPX Card\n"
+	.string "risultano registrati:\p"
+	.string "{STR_VAR_1} CFU.\p"
+	.string "Il requisito minimo per accedere\n"
+	.string "alla Palestra di Statistica POKéMON\l"
+	.string "della famiglia Moretto e' di 8 CFU.\p"
+	.string "Al momento te ne mancano\n"
+	.string "{STR_VAR_2}.\p"
+	.string "Ti invito a tornare quando avrai\n"
+	.string "conseguito i CFU necessari.$"
 
 RustboroCity_Gym_Text_GymGuidePostVictory:
 	.string "Whoa! What a breathtaking victory!\n"

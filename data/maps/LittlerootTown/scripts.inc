@@ -109,6 +109,7 @@ LittlerootTown_EventScript_SetMomInFrontOfDoorFemale::
 LittlerootTown_OnFrame:
 	map_script_2 VAR_LITTLEROOT_INTRO_STATE, 1, LittlerootTown_EventScript_StepOffTruckMale
 	map_script_2 VAR_LITTLEROOT_INTRO_STATE, 2, LittlerootTown_EventScript_StepOffTruckFemale
+	map_script_2 VAR_BIRCH_LAB_STATE, 2, LittlerootTown_EventScript_GiveStarterOutside
 	map_script_2 VAR_DEX_UPGRADE_JOHTO_STARTER_STATE, 1, LittlerootTown_EventScript_BeginDexUpgradeScene
 	.2byte 0
 
@@ -226,8 +227,24 @@ LittlerootTown_EventScript_BeginDexUpgradeScene::
 	end
 
 LittlerootTown_OnWarp:
+	map_script_2 VAR_BIRCH_LAB_STATE, 2, LittlerootTown_EventScript_SetBirchPosForStarterOutside
 	map_script_2 VAR_DEX_UPGRADE_JOHTO_STARTER_STATE, 1, LittlerootTown_EventScript_SetRivalBirchPosForDexUpgrade
 	.2byte 0
+
+LittlerootTown_EventScript_SetBirchPosForStarterOutside::
+	addobject LOCALID_BIRCH
+	checkplayergender
+	goto_if_eq VAR_RESULT, FEMALE, LittlerootTown_EventScript_SetBirchPosForStarterOutsideFemale
+	setobjectxy LOCALID_BIRCH, 7, 15
+	turnobject LOCALID_BIRCH, DIR_WEST
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_EAST
+	end
+
+LittlerootTown_EventScript_SetBirchPosForStarterOutsideFemale::
+	setobjectxy LOCALID_BIRCH, 12, 15
+	turnobject LOCALID_BIRCH, DIR_EAST
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_WEST
+	end
 
 LittlerootTown_EventScript_SetRivalBirchPosForDexUpgrade::
 	addobject LOCALID_BIRCH
@@ -245,6 +262,105 @@ LittlerootTown_EventScript_SetRivalBirchPosForDexUpgradeMale::
 LittlerootTown_EventScript_SetRivalBirchPosForDexUpgradeFemale::
 	setobjectxy LOCALID_RIVAL, 13, 10
 	setobjectxy LOCALID_BIRCH, 14, 10
+	end
+
+LittlerootTown_EventScript_GiveStarterOutside::
+	lockall
+	checkplayergender
+	call_if_eq VAR_RESULT, MALE, LittlerootTown_EventScript_FaceBirchForStarterOutsideMale
+	call_if_eq VAR_RESULT, FEMALE, LittlerootTown_EventScript_FaceBirchForStarterOutsideFemale
+	bufferleadmonspeciesname STR_VAR_1
+	message LittlerootTown_ProfessorBirchsLab_Text_LikeYouToHavePokemon
+	waitmessage
+	playfanfare MUS_OBTAIN_ITEM
+	waitfanfare
+	msgbox LittlerootTown_ProfessorBirchsLab_Text_WhyNotGiveNicknameToMon, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, LittlerootTown_EventScript_NicknameStarterOutside
+	goto_if_eq VAR_RESULT, NO, LittlerootTown_EventScript_GoSeeRivalOutside
+	end
+
+LittlerootTown_EventScript_FaceBirchForStarterOutsideMale::
+	turnobject LOCALID_BIRCH, DIR_WEST
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_EAST
+	return
+
+LittlerootTown_EventScript_FaceBirchForStarterOutsideFemale::
+	turnobject LOCALID_BIRCH, DIR_EAST
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_WEST
+	return
+
+LittlerootTown_EventScript_NicknameStarterOutside::
+	setvar VAR_0x8004, 0
+	call Common_EventScript_NameReceivedPartyMon
+	goto LittlerootTown_EventScript_GoSeeRivalOutside
+	end
+
+LittlerootTown_EventScript_GoSeeRivalOutside::
+	msgbox LittlerootTown_ProfessorBirchsLab_Text_MightBeGoodIdeaToGoSeeRival, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, LittlerootTown_EventScript_AgreeToSeeRivalOutside
+	goto_if_eq VAR_RESULT, NO, LittlerootTown_EventScript_DeclineSeeingRivalOutside
+	end
+
+LittlerootTown_EventScript_AgreeToSeeRivalOutside::
+	msgbox LittlerootTown_ProfessorBirchsLab_Text_GetRivalToTeachYou, MSGBOX_DEFAULT
+	closemessage
+	clearflag FLAG_HIDE_ROUTE_101_BOY
+	checkplayergender
+	call_if_eq VAR_RESULT, MALE, LittlerootTown_EventScript_BirchExitToLabMale
+	call_if_eq VAR_RESULT, FEMALE, LittlerootTown_EventScript_BirchExitToLabFemale
+	setflag FLAG_HIDE_LITTLEROOT_TOWN_BIRCH
+	removeobject LOCALID_BIRCH
+	setvar VAR_BIRCH_LAB_STATE, 3
+	releaseall
+	end
+
+LittlerootTown_EventScript_BirchExitToLabMale::
+	applymovement LOCALID_BIRCH, LittlerootTown_Movement_BirchExitToLabMale
+	waitmovement 0
+	return
+
+LittlerootTown_EventScript_BirchExitToLabFemale::
+	applymovement LOCALID_BIRCH, LittlerootTown_Movement_BirchExitToLabFemale
+	waitmovement 0
+	return
+
+LittlerootTown_Movement_BirchExitToLabMale:
+	walk_down
+	walk_down
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	set_invisible
+	step_end
+
+LittlerootTown_Movement_BirchExitToLabFemale:
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_down
+	walk_down
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	set_invisible
+	step_end
+
+LittlerootTown_EventScript_DeclineSeeingRivalOutside::
+	msgbox LittlerootTown_ProfessorBirchsLab_Text_DontBeThatWay, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, LittlerootTown_EventScript_AgreeToSeeRivalOutside
+	goto_if_eq VAR_RESULT, NO, LittlerootTown_EventScript_DeclineSeeingRivalOutside
 	end
 
 LittlerootTown_EventScript_FatMan::
@@ -1019,4 +1135,3 @@ LittlerootTown_Text_BirchSomethingToShowYouAtLab:
 	.string "I gave you?\p"
 	.string "I have something to show you.\n"
 	.string "Let's go to my LAB.$"
-

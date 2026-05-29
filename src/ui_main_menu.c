@@ -453,6 +453,8 @@ static bool8 MainMenu_DoGfxSetup(void)
     switch (gMain.state)
     {
     case 0:
+        FillPalette(RGB_BLACK, 0, PLTT_SIZE);
+        DmaFill16(3, RGB_BLACK, (void *)PLTT, PLTT_SIZE);
         DmaClearLarge16(3, (void *)VRAM, VRAM_SIZE, 0x1000)
         SetGpuReg(REG_OFFSET_DISPCNT, 0);
         SetGpuReg(REG_OFFSET_WIN0H, 0);

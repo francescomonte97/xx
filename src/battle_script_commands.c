@@ -1,5 +1,6 @@
 #include "global.h"
 #include "battle.h"
+#include "cfu.h"
 #include "battle_message.h"
 #include "battle_anim.h"
 #include "battle_ai_script_commands.h"
@@ -7,6 +8,7 @@
 #include "item.h"
 #include "util.h"
 #include "pokemon.h"
+#include "ppa.h"
 #include "random.h"
 #include "battle_controllers.h"
 #include "battle_interface.h"
@@ -3006,6 +3008,8 @@ static void Cmd_tryfaintmon(void)
             gBattlescriptCurrInstr = BS_ptr;
             if (GetBattlerSide(gActiveBattler) == B_SIDE_PLAYER)
             {
+                if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+                    SubPpa(1);
                 gHitMarker |= HITMARKER_PLAYER_FAINTED;
                 if (gBattleResults.playerFaintCounter < 255)
                     gBattleResults.playerFaintCounter++;
@@ -10048,6 +10052,7 @@ static void Cmd_trysetcaughtmondexflags(void)
     else
     {
         HandleSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_SET_CAUGHT, personality);
+        TryAddCfuForNewCaughtSpecies();
         gBattlescriptCurrInstr += 5;
     }
 }

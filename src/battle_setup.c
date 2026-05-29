@@ -14,6 +14,7 @@
 #include "starter_choose.h"
 #include "script_pokemon_util.h"
 #include "palette.h"
+#include "ppa.h"
 #include "window.h"
 #include "event_object_movement.h"
 #include "event_scripts.h"
@@ -84,6 +85,8 @@ static void CB2_GiveStarter(void);
 static void CB2_StartFirstBattle(void);
 static void CB2_EndFirstBattle(void);
 static void CB2_EndTrainerBattle(void);
+static void AddPpaForWonTrainerBattle(void);
+static void AddPpaForWonTrainer(u16 trainerId);
 static bool32 IsPlayerDefeated(u32 battleOutcome);
 static u16 GetRematchTrainerId(u16 trainerId);
 static void RegisterTrainerInMatchCall(void);
@@ -1330,6 +1333,9 @@ void BattleSetup_StartTrainerBattle(void)
 
 static void CB2_EndTrainerBattle(void)
 {
+    if (gBattleOutcome == B_OUTCOME_WON)
+        AddPpaForWonTrainerBattle();
+
     if (gTrainerBattleOpponent_A == TRAINER_SECRET_BASE)
     {
         SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
@@ -1354,6 +1360,9 @@ static void CB2_EndTrainerBattle(void)
 
 static void CB2_EndRematchBattle(void)
 {
+    if (gBattleOutcome == B_OUTCOME_WON)
+        AddPpaForWonTrainerBattle();
+
     if (gTrainerBattleOpponent_A == TRAINER_SECRET_BASE)
     {
         SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
@@ -1369,6 +1378,23 @@ static void CB2_EndRematchBattle(void)
         SetBattledTrainersFlags();
         HandleRematchVarsOnBattleEnd();
     }
+}
+
+static void AddPpaForWonTrainerBattle(void)
+{
+    AddPpaForWonTrainer(gTrainerBattleOpponent_A);
+
+    if (sNoOfPossibleTrainerRetScripts > 1)
+        AddPpaForWonTrainer(gTrainerBattleOpponent_B);
+}
+
+static void AddPpaForWonTrainer(u16 trainerId)
+{
+    if (trainerId != TRAINER_SECRET_BASE
+     && gTrainers[trainerId].trainerClass == TRAINER_CLASS_LEADER)
+        AddPpa(10);
+    else
+        AddPpa(5);
 }
 
 void BattleSetup_StartRematchBattle(void)

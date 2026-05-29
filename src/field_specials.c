@@ -105,6 +105,7 @@ static void PetalburgGymSetDoorMetatiles(u8, u16);
 static void Task_PCTurnOnEffect(u8);
 static void PCTurnOnEffect(struct Task *);
 static void PCTurnOnEffect_SetMetatile(s16, s8, s8);
+static bool8 PCEffect_CanReplaceMetatile(u16);
 static void PCTurnOffEffect(void);
 static void Task_LotteryCornerComputerEffect(u8);
 static void LotteryCornerComputerEffect(struct Task *);
@@ -1046,6 +1047,12 @@ static void PCTurnOnEffect(struct Task *task)
 static void PCTurnOnEffect_SetMetatile(s16 isScreenOn, s8 dx, s8 dy)
 {
     u16 metatileId = 0;
+    s16 x = gSaveBlock1Ptr->pos.x + dx + MAP_OFFSET;
+    s16 y = gSaveBlock1Ptr->pos.y + dy + MAP_OFFSET;
+
+    if (!PCEffect_CanReplaceMetatile(MapGridGetMetatileIdAt(x, y) & MAPGRID_METATILE_ID_MASK))
+        return;
+
     if (isScreenOn)
     {
         // Screen is on, set it off
@@ -1066,7 +1073,25 @@ static void PCTurnOnEffect_SetMetatile(s16 isScreenOn, s8 dx, s8 dy)
         else if (gSpecialVar_0x8004 == PC_LOCATION_MAYS_HOUSE)
             metatileId = METATILE_BrendansMaysHouse_MayPC_On;
     }
-    MapGridSetMetatileIdAt(gSaveBlock1Ptr->pos.x + dx + MAP_OFFSET, gSaveBlock1Ptr->pos.y + dy + MAP_OFFSET, metatileId | MAPGRID_COLLISION_MASK);
+    MapGridSetMetatileIdAt(x, y, metatileId | MAPGRID_COLLISION_MASK);
+}
+
+static bool8 PCEffect_CanReplaceMetatile(u16 currentMetatileId)
+{
+    switch (gSpecialVar_0x8004)
+    {
+    case PC_LOCATION_OTHER:
+        return currentMetatileId == METATILE_Building_PC_Off
+            || currentMetatileId == METATILE_Building_PC_On;
+    case PC_LOCATION_BRENDANS_HOUSE:
+        return currentMetatileId == METATILE_BrendansMaysHouse_BrendanPC_Off
+            || currentMetatileId == METATILE_BrendansMaysHouse_BrendanPC_On;
+    case PC_LOCATION_MAYS_HOUSE:
+        return currentMetatileId == METATILE_BrendansMaysHouse_MayPC_Off
+            || currentMetatileId == METATILE_BrendansMaysHouse_MayPC_On;
+    default:
+        return FALSE;
+    }
 }
 
 // For this special, gSpecialVar_0x8004 is expected to be some PC_LOCATION_* value.
@@ -1083,6 +1108,8 @@ static void PCTurnOffEffect(void)
 
     // Get where the PC should be, depending on where the player is looking.
     u8 playerDirection = GetPlayerFacingDirection();
+    s16 x;
+    s16 y;
     switch (playerDirection)
     {
     case DIR_NORTH:
@@ -1106,7 +1133,10 @@ static void PCTurnOffEffect(void)
     else if (gSpecialVar_0x8004 == PC_LOCATION_MAYS_HOUSE)
         metatileId = METATILE_BrendansMaysHouse_MayPC_Off;
 
-    MapGridSetMetatileIdAt(gSaveBlock1Ptr->pos.x + dx + MAP_OFFSET, gSaveBlock1Ptr->pos.y + dy + MAP_OFFSET, metatileId | MAPGRID_COLLISION_MASK);
+    x = gSaveBlock1Ptr->pos.x + dx + MAP_OFFSET;
+    y = gSaveBlock1Ptr->pos.y + dy + MAP_OFFSET;
+    if (PCEffect_CanReplaceMetatile(MapGridGetMetatileIdAt(x, y) & MAPGRID_METATILE_ID_MASK))
+        MapGridSetMetatileIdAt(x, y, metatileId | MAPGRID_COLLISION_MASK);
     DrawWholeMapView();
 }
 
